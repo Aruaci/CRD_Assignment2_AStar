@@ -30,8 +30,16 @@ public class AStar : MonoBehaviour
     {
         _gridNodes = new Node[_width, _height];
         PopulateGridOfNodes();
-        // _obstacleMatrix = new int[_width, _height];
-        // GetObstacleMatrix();
+        List<Node> N = getNodeNeighbours((GameObjectToNode(_player)));
+        print(N.Count);
+        print(N[0].position);
+        print(N[1].position);
+        print(N[2].position);
+        print(N[3].position);
+        print(N[4].position);
+        print(N[5].position);
+        print(N[6].position);
+        print(N[7].position);
         // FindShortestPath(_player, _goal);
 
     }
@@ -47,34 +55,11 @@ public class AStar : MonoBehaviour
         }
     }
 
-    private void GetObstacleMatrix()
-    {
-        foreach (Transform cell in transform.GetComponentInChildren<Transform>())
-        {
-            float _x = cell.position.x;
-            float _z = cell.position.z;
-            int xIndex = Mathf.FloorToInt(_x);
-            int zIndex = Mathf.FloorToInt(_z);
-
-            //if (cell.gameObject.GetComponent<TileInfo>()._hasObstacle)
-            if (DetectObstacle(cell))
-            {
-                _obstacleMatrix[xIndex, zIndex] = 1;
-            }
-            else
-            {
-                _obstacleMatrix[xIndex, zIndex] = 0;
-            }
-        }
-    }
-    
     private bool DetectObstacle(Transform cell)
     {
         Ray ray = new Ray(cell.position, transform.up);
         RaycastHit hit;
-        
-        // _hasObstacle = false;
-        
+
         if (Physics.Raycast(ray, out hit, _raycastDistance))
         {
             // Collision occurred, information about hit object can be accessed
@@ -82,7 +67,6 @@ public class AStar : MonoBehaviour
 
             if (hitObject.CompareTag("Obstacle"))
             {
-                print(hitObject.name);
                 return true;
                 // Debug.DrawRay(ray.origin, ray.direction, Color.red);
             }
@@ -139,7 +123,7 @@ public class AStar : MonoBehaviour
 
         for (int x = -1; x <= 1; x++)
         {
-            for (int y = -1; y < 1; y++)
+            for (int y = -1; y <= 1; y++)
             {
                 if (x == 0 && y == 0) continue;
 
@@ -147,13 +131,12 @@ public class AStar : MonoBehaviour
                 int checkY = node.gridY + y;
 
                 // NOTE: not sure if _width is right
-                if (checkX >= 0 && checkX < _width)
+                if (checkX >= 0 && checkX < _width && checkY >= 0 && checkY < _height)
                 {
-                    // STOPPING POINT NEED TO CONTINUE WRITING CODE HERE
+                    neighbours.Add(_gridNodes[checkX, checkY]);
                 }
             }
         }
-        // DELETE:
-        return new List<Node>();
+        return neighbours;
     }
 }
