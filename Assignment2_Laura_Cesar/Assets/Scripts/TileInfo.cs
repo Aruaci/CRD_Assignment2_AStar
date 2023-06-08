@@ -3,12 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 
 public class TileInfo : MonoBehaviour
 {
     public bool _hasObstacle = false;
     private bool _hasPlayer = false;
     private bool _hasGoal = false;
+    public bool _hasPath = false;
+    
     [SerializeField]
     private Material tileBaseMaterial;
     [SerializeField]
@@ -82,7 +85,7 @@ public class TileInfo : MonoBehaviour
         {
             meshRenderer.material = goalMaterial;
         }
-        else if (_hasPlayer)
+        else if (_hasPlayer || _hasPath)
         {
             meshRenderer.material = playerMaterial;
         }

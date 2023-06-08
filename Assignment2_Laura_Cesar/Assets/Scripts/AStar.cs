@@ -33,7 +33,7 @@ public class AStar : MonoBehaviour
         _gridNodes = new Node[_width, _height];
         PopulateGridOfNodes();
         FindShortestPath(_player, _goal);
-        print(ShortestPath.Count);
+        ColorPathTiles(ShortestPath);
     }
 
     private void PopulateGridOfNodes()
@@ -98,11 +98,11 @@ public class AStar : MonoBehaviour
             {
                 print("Target found: " +  currentNode.position);
                 
-                print(currentNode.parent.position);
-                print(currentNode.parent.parent.position);
-                print(currentNode.parent.parent.parent.position);
-                print(currentNode.parent.parent.parent.parent.position);
-                print(currentNode.parent.parent.parent.parent.parent.position);
+                // print(currentNode.parent.position);
+                // print(currentNode.parent.parent.position);
+                // print(currentNode.parent.parent.parent.position);
+                // print(currentNode.parent.parent.parent.parent.position);
+                // print(currentNode.parent.parent.parent.parent.parent.position);
 
                 RetraceFoundPath(startNode, currentNode);
             }
@@ -174,16 +174,34 @@ public class AStar : MonoBehaviour
         List<Node> path = new List<Node>();
         Node currentNode = endNode;
 
-        while (currentNode.gridX != startNode.gridX && currentNode.gridY != startNode.gridY)
+        while (currentNode.gridX != startNode.gridX || currentNode.gridY != startNode.gridY)
         {
             path.Add(currentNode);
             currentNode = currentNode.parent;
         }
+        
+        print("Path number of nodes: " + path.Count);
 
         ShortestPath = new List<Node>();
         for (int i = path.Count - 1; i >= 0; i--)
         {
             ShortestPath.Add(path[i]);
+        }
+    }
+
+    private void ColorPathTiles(List<Node> pathNodes)
+    {
+        print("Number of nodes in pathNodes: " + pathNodes.Count);
+        foreach (var node in pathNodes)
+        {
+            foreach (Transform cell in transform.GetComponentInChildren<Transform>())
+            {
+                if (cell.transform.position.x == node.gridX && cell.transform.position.z == node.gridY)
+                {
+                    print(cell.position);
+                    cell.GetComponent<TileInfo>()._hasPath = true;
+                }
+            }
         }
     }
 }
