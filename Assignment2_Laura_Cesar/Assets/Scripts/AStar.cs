@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class AStar : MonoBehaviour
 {
@@ -16,7 +17,7 @@ public class AStar : MonoBehaviour
     [SerializeField] 
     private GameObject _goal;
     
-    private GameObject[,] _gridCells;
+    private Node[,] _gridNodes;
     private float _raycastDistance = 50f;
     private int[,] _obstacleMatrix;
 
@@ -27,27 +28,22 @@ public class AStar : MonoBehaviour
 
     void Start()
     {
-        _gridCells = new GameObject[_width, _height];
-        _obstacleMatrix = new int[_width, _height];
-        GetGrid();
-        GetObstacleMatrix();
-        _startX = Convert.ToInt32(_player.transform.position.x);
-        _startY = Convert.ToInt32(_player.transform.position.z);
-        _goalX = Convert.ToInt32(_goal.transform.position.x);
-        _goalY  = Convert.ToInt32(_goal.transform.position.z);
-        FindShortestPath(_player, _goal);
+        _gridNodes = new Node[_width, _height];
+        PopulateGridOfNodes();
+        // _obstacleMatrix = new int[_width, _height];
+        // GetObstacleMatrix();
+        // FindShortestPath(_player, _goal);
 
     }
 
-    private void GetGrid()
+    private void PopulateGridOfNodes()
     {
         foreach (Transform cell in transform.GetComponentInChildren<Transform>())
         {
-            float _x = cell.position.x;
-            float _z = cell.position.z;
-            int xIndex = Mathf.FloorToInt(_x);
-            int zIndex = Mathf.FloorToInt(_z);
-            _gridCells[xIndex, zIndex] = cell.gameObject;
+            Vector3 originalPosition = cell.transform.position;
+            Node node = new Node(!DetectObstacle(cell), originalPosition, (int)originalPosition.x, (int)originalPosition.z);
+            
+            _gridNodes[(int)originalPosition.x, (int)originalPosition.z] = node;
         }
     }
 
@@ -98,21 +94,66 @@ public class AStar : MonoBehaviour
     {
         Node startNode = GameObjectToNode(player);
         Node targetNode = GameObjectToNode(goal);
-        
-        print(startNode.position);
-        print(targetNode.position);
-        
+
         List<Node> openTiles = new List<Node>();
         List<Node> closedTiles = new List<Node>();
 
         while (openTiles.Count > 0)
         {
-            Node currentNiode = openTiles[0];
+            Node currentNode = openTiles[0];
+            for (int i = 1; i < openTiles.Count; i++)
+            {
+                if (openTiles[i].fCost < currentNode.fCost || 
+                    openTiles[i].fCost == currentNode.fCost && 
+                    openTiles[i].hCost < currentNode.hCost)
+                {
+                    currentNode = openTiles[i];
+                }
+            }
+
+            openTiles.Remove(currentNode);
+            closedTiles.Add(currentNode);
+
+            if (currentNode == targetNode) {}
+            {
+                print("Target found: " +  currentNode.position);
+                return;
+            }
         }
     }
 
     private Node GameObjectToNode(GameObject _object)
     {
-        return new Node(false, _object.transform.position);
+        Vector3 originalPosition = _object.transform.position;
+        
+        float x = Mathf.RoundToInt(originalPosition.x);
+        float z = Mathf.RoundToInt(originalPosition.z);
+
+        Vector3 position = new Vector3(x, 0, z);
+        return new Node(false, position, (int)x, (int)z);
+    }
+
+    public List<Node> getNodeNeighbours(Node node)
+    {
+        List<Node> neighbours = new List<Node>();
+
+        for (int x = -1; x <= 1; x++)
+        {
+            for (int y = -1; y < 1; y++)
+            {
+                if (x == 0 && y == 0) continue;
+
+                int checkX = node.gridX + x;
+                int checkY = node.gridY + y;
+
+                // NOTE: not sure if _width is right
+                if (checkX >= 0 && checkX < _width)
+                {
+                    // STOPPING POINT NEED TO CONTINUE WRITING CODE HERE
+                }
+            }
+        }
+        // DELETE:
+        return new List<Node>();
     }
 }
