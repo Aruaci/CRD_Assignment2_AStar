@@ -30,16 +30,8 @@ public class AStar : MonoBehaviour
     {
         _gridNodes = new Node[_width, _height];
         PopulateGridOfNodes();
-        List<Node> N = getNodeNeighbours((GameObjectToNode(_player)));
-        print(N.Count);
-        print(N[0].position);
-        print(N[1].position);
-        print(N[2].position);
-        print(N[3].position);
-        print(N[4].position);
-        print(N[5].position);
-        print(N[6].position);
-        print(N[7].position);
+        List<Node> N = GetNodeNeighbours((GameObjectToNode(_player)));
+        print(GetDistanceOf(GameObjectToNode(_player),GameObjectToNode(_goal)));
         // FindShortestPath(_player, _goal);
 
     }
@@ -103,6 +95,14 @@ public class AStar : MonoBehaviour
                 print("Target found: " +  currentNode.position);
                 return;
             }
+
+            foreach (Node neighbour in GetNodeNeighbours(currentNode))
+            {
+                if (!neighbour.isWalkable || closedTiles.Contains(neighbour))
+                {
+                    continue;
+                }
+            }
         }
     }
 
@@ -117,7 +117,7 @@ public class AStar : MonoBehaviour
         return new Node(false, position, (int)x, (int)z);
     }
 
-    public List<Node> getNodeNeighbours(Node node)
+    private List<Node> GetNodeNeighbours(Node node)
     {
         List<Node> neighbours = new List<Node>();
 
@@ -138,5 +138,14 @@ public class AStar : MonoBehaviour
             }
         }
         return neighbours;
+    }
+
+    private int GetDistanceOf(Node nodeA, Node nodeB)
+    {
+        int distX = Mathf.Abs(nodeA.gridX - nodeB.gridX);
+        int distY = Mathf.Abs(nodeA.gridY - nodeB.gridY);
+
+        if (distX > distY) return 14 * distY + 10 * (distX - distY);
+        return 14 * distX + 10 * (distY - distX);
     }
 }
