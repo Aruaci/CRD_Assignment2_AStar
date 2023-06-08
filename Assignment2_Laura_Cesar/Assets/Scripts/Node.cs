@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Node : MonoBehaviour
+public class Node
 {
     public bool isWalkable;
     public Vector3 position;
@@ -12,6 +12,8 @@ public class Node : MonoBehaviour
     public int gCost;
     public int hCost;
     public int fCost => gCost + hCost;
+
+    public Node parent;
 
     public Node(bool _isWalkable, Vector3 _position, int _gridX, int _gridY)
     {
