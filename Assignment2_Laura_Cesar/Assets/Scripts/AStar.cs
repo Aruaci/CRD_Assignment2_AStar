@@ -36,6 +36,13 @@ public class AStar : MonoBehaviour
         ColorPathTiles(ShortestPath);
     }
 
+    private void Update()
+    {
+        // PopulateGridOfNodes();
+        FindShortestPath(_player, _goal);
+        ColorPathTiles(ShortestPath);
+    }
+
     private void PopulateGridOfNodes()
     {
         foreach (Transform cell in transform.GetComponentInChildren<Transform>())
@@ -96,7 +103,7 @@ public class AStar : MonoBehaviour
 
             if (currentNode.gridX == targetNode.gridX && currentNode.gridY == targetNode.gridY)
             {
-                print("Target found: " +  currentNode.position);
+                // print("Target found: " +  currentNode.position);
                 
                 // print(currentNode.parent.position);
                 // print(currentNode.parent.parent.position);
@@ -179,8 +186,6 @@ public class AStar : MonoBehaviour
             path.Add(currentNode);
             currentNode = currentNode.parent;
         }
-        
-        print("Path number of nodes: " + path.Count);
 
         ShortestPath = new List<Node>();
         for (int i = path.Count - 1; i >= 0; i--)
@@ -191,14 +196,12 @@ public class AStar : MonoBehaviour
 
     private void ColorPathTiles(List<Node> pathNodes)
     {
-        print("Number of nodes in pathNodes: " + pathNodes.Count);
         foreach (var node in pathNodes)
         {
             foreach (Transform cell in transform.GetComponentInChildren<Transform>())
             {
                 if (cell.transform.position.x == node.gridX && cell.transform.position.z == node.gridY)
                 {
-                    print(cell.position);
                     cell.GetComponent<TileInfo>()._hasPath = true;
                 }
             }
