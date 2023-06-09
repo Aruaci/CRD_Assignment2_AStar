@@ -22,17 +22,18 @@ public class TileInfo : MonoBehaviour
     private Material goalMaterial;
 
     private MeshRenderer meshRenderer;
-    
+
     private float _raycastDistance = 50f;
+    private Vector3 _elevated;
 
     private void Awake()
     {
         meshRenderer = GetComponent<MeshRenderer>();
-        
     }
 
     private void Start()
     {
+        
         DetectObstacle();
         UpdateMaterial();
     }

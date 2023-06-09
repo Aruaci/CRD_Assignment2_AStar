@@ -16,6 +16,8 @@ public class AStar : MonoBehaviour
     private GameObject _player;
     [SerializeField] 
     private GameObject _goal;
+    [SerializeField] 
+    private Animator _animator;
 
     private Node[,] _gridNodes;
     private float _raycastDistance = 50f;
@@ -36,7 +38,7 @@ public class AStar : MonoBehaviour
     [SerializeField]
     private float _rotationDuration = 2;
     [SerializeField]
-    private float _moveStartDelay = 3.0f;
+    private float _moveStartDelay = 0.0f;
 
     void Start()
     {
@@ -44,9 +46,6 @@ public class AStar : MonoBehaviour
         PopulateGridOfNodes();
         FindShortestPath(_player, _goal);
         ColorPathTiles(ShortestPath);
-        print(ShortestPathTransforms[0].position);
-        // MoveAlongPath(ShortestPathTransforms);
-        StartMovingCoroutineWithDelay();
     }
 
     private void PopulateGridOfNodes()
@@ -195,6 +194,11 @@ public class AStar : MonoBehaviour
 
     private void ColorPathTiles(List<Node> pathNodes)
     {
+        StartCoroutine(ColorPathTilesWithDelay(pathNodes));
+    }
+
+    private IEnumerator ColorPathTilesWithDelay(List<Node> pathNodes)
+    {
         ShortestPathTransforms = new List<Transform>();
         foreach (var node in pathNodes)
         {
@@ -202,14 +206,17 @@ public class AStar : MonoBehaviour
             {
                 if (cell.transform.position.x == node.gridX && cell.transform.position.z == node.gridY)
                 {
+                    yield return new WaitForSeconds(0.5f);
                     cell.GetComponent<TileInfo>()._hasPath = true;
                     CreatePathTransformList(cell);
                 }
             }
         }
+        
+        StartMovingCoroutineWithDelay();
     }
 
-    private void CreatePathTransformList(Transform cell)
+    void CreatePathTransformList(Transform cell)
     {
         ShortestPathTransforms.Add(cell);
     }
@@ -233,13 +240,14 @@ public class AStar : MonoBehaviour
         Vector3 targetPosition = new Vector3(ShortestPathTransforms[currentPosition].position.x, _player.transform.position.y, ShortestPathTransforms[currentPosition].position.z);
         Quaternion startRotation = _player.transform.rotation;
         Quaternion targetRotation = Quaternion.LookRotation(targetPosition - _player.transform.position);
-        
+
         float t = 0f;
         
         while (_player.transform.position != targetPosition)
         {
             while (t < _rotationDuration && Quaternion.Angle(startRotation, targetRotation) > 0.01f)
             {
+                _animator.SetBool("isIdle", true);
                 t += Time.deltaTime;
                 float normalizedTime = t / _rotationDuration;
                 float easedTime = EaseInOutBack(normalizedTime);
@@ -251,9 +259,12 @@ public class AStar : MonoBehaviour
                 );
                 yield return null;
             }
+
+            _animator.SetBool("isIdle", false);
             _player.transform.position = Vector3.MoveTowards(_player.transform.position, targetPosition, _moveSpeed * Time.deltaTime);
             yield return null;
         }
+        _animator.SetBool("isIdle", true);
     }
 
     private float EaseInOutBack(float x)
