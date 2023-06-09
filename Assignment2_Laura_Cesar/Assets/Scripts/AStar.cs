@@ -34,7 +34,7 @@ public class AStar : MonoBehaviour
     [SerializeField]
     private float _moveSpeed = 8;
     [SerializeField]
-    private float _rotationSpeed = 2;
+    private float _rotationDuration = 2;
     [SerializeField]
     private float _moveStartDelay = 3.0f;
 
@@ -109,13 +109,6 @@ public class AStar : MonoBehaviour
 
             if (currentNode.gridX == targetNode.gridX && currentNode.gridY == targetNode.gridY)
             {
-                // print("Target found: " +  currentNode.position);
-                
-                // print(currentNode.parent.position);
-                // print(currentNode.parent.parent.position);
-                // print(currentNode.parent.parent.parent.position);
-                // print(currentNode.parent.parent.parent.parent.position);
-                // print(currentNode.parent.parent.parent.parent.parent.position);
 
                 RetraceFoundPath(startNode, currentNode);
             }
@@ -238,12 +231,27 @@ public class AStar : MonoBehaviour
     IEnumerator Moving(int currentPosition)
     {
         Vector3 targetPosition = new Vector3(ShortestPathTransforms[currentPosition].position.x, _player.transform.position.y, ShortestPathTransforms[currentPosition].position.z);
+        Quaternion startRotation = _player.transform.rotation;
         Quaternion targetRotation = Quaternion.LookRotation(targetPosition - _player.transform.position);
-
+        
+        float t = 0f;
+        
         while (_player.transform.position != targetPosition)
         {
+            while (t < _rotationDuration && Quaternion.Angle(startRotation, targetRotation) > 0.01f)
+            {
+                t += Time.deltaTime;
+                float normalizedTime = t / _rotationDuration;
+                float easedTime = EaseInOutBack(normalizedTime);
+                _player.transform.rotation = new Quaternion(
+                    startRotation.x * (1 - easedTime) + targetRotation.x * easedTime,
+                    startRotation.y * (1 - easedTime) + targetRotation.y * easedTime,
+                    startRotation.z * (1 - easedTime) + targetRotation.z * easedTime,
+                    startRotation.w * (1 - easedTime) + targetRotation.w * easedTime
+                );
+                yield return null;
+            }
             _player.transform.position = Vector3.MoveTowards(_player.transform.position, targetPosition, _moveSpeed * Time.deltaTime);
-            _player.transform.rotation = targetRotation;
             yield return null;
         }
     }

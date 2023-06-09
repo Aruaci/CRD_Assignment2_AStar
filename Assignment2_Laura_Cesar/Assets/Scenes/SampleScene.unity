@@ -1014,7 +1014,7 @@ MonoBehaviour:
   _player: {fileID: 450179057}
   _goal: {fileID: 199991836}
   _moveSpeed: 2
-  _rotationSpeed: 2
+  _rotationDuration: 1
   _moveStartDelay: 3
 --- !u!1001 &1282857700
 PrefabInstance:
