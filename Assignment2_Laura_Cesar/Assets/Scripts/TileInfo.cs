@@ -98,5 +98,4 @@ public class TileInfo : MonoBehaviour
             meshRenderer.material = tileBaseMaterial;
         }
     }
-
 }
