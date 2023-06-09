@@ -27,6 +27,16 @@ public class AStar : MonoBehaviour
     private int _goalY;
 
     private List<Node> ShortestPath;
+    private List<Transform> ShortestPathTransforms;
+    
+    Coroutine MoveIE;
+    
+    [SerializeField]
+    private float _moveSpeed = 8;
+    [SerializeField]
+    private float _rotationSpeed = 2;
+    [SerializeField]
+    private float _moveStartDelay = 3.0f;
 
     void Start()
     {
@@ -34,13 +44,9 @@ public class AStar : MonoBehaviour
         PopulateGridOfNodes();
         FindShortestPath(_player, _goal);
         ColorPathTiles(ShortestPath);
-    }
-
-    private void Update()
-    {
-        // PopulateGridOfNodes();
-        FindShortestPath(_player, _goal);
-        ColorPathTiles(ShortestPath);
+        print(ShortestPathTransforms[0].position);
+        // MoveAlongPath(ShortestPathTransforms);
+        StartMovingCoroutineWithDelay();
     }
 
     private void PopulateGridOfNodes()
@@ -196,6 +202,7 @@ public class AStar : MonoBehaviour
 
     private void ColorPathTiles(List<Node> pathNodes)
     {
+        ShortestPathTransforms = new List<Transform>();
         foreach (var node in pathNodes)
         {
             foreach (Transform cell in transform.GetComponentInChildren<Transform>())
@@ -203,8 +210,51 @@ public class AStar : MonoBehaviour
                 if (cell.transform.position.x == node.gridX && cell.transform.position.z == node.gridY)
                 {
                     cell.GetComponent<TileInfo>()._hasPath = true;
+                    CreatePathTransformList(cell);
                 }
             }
         }
+    }
+
+    private void CreatePathTransformList(Transform cell)
+    {
+        ShortestPathTransforms.Add(cell);
+    }
+    
+    void StartMovingCoroutineWithDelay()
+    {
+        StartCoroutine(moveOnPath(_moveStartDelay));
+    }
+    IEnumerator moveOnPath(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        for (int i = 0; i < ShortestPathTransforms.Count; i++)
+        {
+            MoveIE = StartCoroutine(Moving(i));
+            yield return MoveIE;
+        }
+    }
+    
+    IEnumerator Moving(int currentPosition)
+    {
+        Vector3 targetPosition = new Vector3(ShortestPathTransforms[currentPosition].position.x, _player.transform.position.y, ShortestPathTransforms[currentPosition].position.z);
+        Quaternion targetRotation = Quaternion.LookRotation(targetPosition - _player.transform.position);
+
+        while (_player.transform.position != targetPosition)
+        {
+            _player.transform.position = Vector3.MoveTowards(_player.transform.position, targetPosition, _moveSpeed * Time.deltaTime);
+            _player.transform.rotation = targetRotation;
+            yield return null;
+        }
+    }
+
+    private float EaseInOutBack(float x)
+    {
+        float c1 = 1.70158f;
+        float c2 = c1 * 1.525f;
+
+        return x < 0.5f
+            ? (Mathf.Pow(2f * x, 2f) * ((c2 + 1f) * 2f * x - c2)) / 2f
+            : (Mathf.Pow(2f * x - 2f, 2f) * ((c2 + 1f) * (x * 2f - 2f) + c2) + 2f) / 2f;
     }
 }

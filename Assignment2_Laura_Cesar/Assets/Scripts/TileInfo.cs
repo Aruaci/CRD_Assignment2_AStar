@@ -39,7 +39,6 @@ public class TileInfo : MonoBehaviour
 
     private void Update()
     {
-        DetectObstacle();
         UpdateMaterial();
     }
 
